@@ -17,7 +17,7 @@ df = pd.merge(df1, df2, on=['tipodia', 'periodotsexpedicion', 'serviciosentido']
 
 df.rename({'periodotsexpedicion':'periodo'}, axis=1, inplace=True)
 
-df['fmax'] = df['subidasmax'] / df['subidasprom']
+df['fmax'] = df['subidasmax']**2 / df['subidasprom']
 df['fmin'] = df['subidasmin'] / df['subidasprom']
 
 # mantener periodos PM, FP y PT de días laborales.
