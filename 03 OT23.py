@@ -121,7 +121,6 @@ df=df[df['periodo'].isin([4,6,9])]
 # construir identificador de servicio-sentido.
 df['Servicio'] = df['Servicio'].str.upper()
 
-exit()
 df['serviciousuariots'] = df['Servicio']
 df = df[df['serviciousuariots'].notnull()]
 df = df[['ot', 'serviciousuariots', 'paradero', 'punto', 'fecha', 'periodo', 'tipo_bus', 'plazas', 'toc_categoria', 'toc']]
@@ -133,8 +132,9 @@ df['punto'].fillna('-', inplace=True)
 # agregar varianza de la medición.
 df['toc_categoria'].replace({'1A':'1', '1B':'1', '4A':'4', '4B':'4', '4C':'4'}, inplace=True)
 print(df[['tipo_bus', 'plazas', 'toc_categoria']])
+print(len(df))
 df = df.merge(va, on=['tipo_bus', 'plazas', 'toc_categoria'], how='left', indicator=True)
-
+print(len(df))
 def my_agg(x):
 	names = {
 		'toc'		: x['toc'].mean(),
@@ -172,11 +172,13 @@ dd.loc[dd['servicioPM'], 'serviciousuariots'] = dd['serviciousuariots'].str[:-2]
 df = df.merge(dd, on=['serviciousuariots', 'paradero'], how='left', indicator=True)
 df['servicioPM'].fillna(False, inplace=True)
 '''
-Total df: 35
-Total df['both']= 31
+Total df: 6430
+Total df['both']= 4848
 print(len(df[df['_merge']=='both']))
 print(len(df[df['_merge']=='left_only']))
 '''
+
+
 
 df=df[df['_merge']=='both']
 
