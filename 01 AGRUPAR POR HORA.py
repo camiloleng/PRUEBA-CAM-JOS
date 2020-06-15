@@ -39,10 +39,24 @@ df = df[df['tipo_bus'].notnull()]						# sin tipo de bus
 df = df[df['toc_categoria'].notnull()]					# sin categoría de tasa de ocupación
 
 # cambiar tipo de datos.
+'''
+-Jose
+Revisar que el formato fecha este en español
+'''
+df['fecha'] = pd.to_datetime(df['fecha']).dt.strftime('%d/%m/%Y')
 df['hora']  	= pd.to_timedelta(df['hora'])
 df['dow'] 		= pd.to_datetime(df['fecha']).dt.dayofweek
 df['plazas'] 	= df['plazas'].astype(int)
 df['toc'] 		= df['toc'].astype(float)
+
+'''
+Verificar formatos fecha
+print(df['fecha'].unique())
+print(df['dow'].unique())
+print(df[['dow', 'fecha']])
+'''
+
+
 
 # asignar periodo.
 df.loc[(df['dow']< 5) & (df['hora']< '01:00:00'), 'periodo'] = 1
@@ -75,6 +89,18 @@ df.loc[(df['dow']==6) & (df['hora']>='17:30:00') & (df['hora']<'21:00:00'), 'per
 df.loc[(df['dow']==6) & (df['hora']>='21:00:00') & (df['hora']<'23:00:00'), 'periodo'] = 28
 df.loc[(df['dow']==6) & (df['hora']>='23:00:00'), 'periodo'] = 29
 
+
+
+
+#Filtrar solo Periodos a utilizar
+print(df['periodo'].unique())
+
+
+
+df=df[df['periodo'].isin([4,6,9])]
+# print(df['periodo'].unique())
+
+
 print(df[df['Servicio'].notnull()]['Servicio'])
 print(df[df['Sentido_Servicio'].notnull()]['Sentido_Servicio'])
 
@@ -84,9 +110,9 @@ df['Servicio'] = df['Servicio'].str.upper()
 
 
 '''
-Se modificó debido a que no agarraba el valor de la columna 'Sentido_Servicio' 
+Linea 121 se modificó debido a que no agarraba el valor de la columna 'Sentido_Servicio' 
 y quedaba un Dataframe con un solo dato.
-Verificar con lineas 88 y 89-
+Verificar con lineas 117 y 118-
 
 # print(df['Sentido_Servicio'].values)
 # print(df['Sentido_Servicio'][:1])
@@ -142,11 +168,12 @@ dd.loc[dd['servicioPM'], 'serviciousuariots'] = dd['serviciousuariots'].str[:-2]
 df = df.merge(dd, on=['serviciousuariots', 'paradero'], how='left', indicator=True)
 df['servicioPM'].fillna(False, inplace=True)
 '''
-Total df: 138
-Total df['both']= 110
+Total df: 103
+Total df['both']= 25
 print(len(df[df['_merge']=='both']))
 print(len(df[df['_merge']=='left_only']))
 '''
+
 df=df[df['_merge']=='both']
 
 # restaurar formato original de serviciousuatiots.
@@ -156,4 +183,4 @@ df.loc[df['servicioPM'], 'serviciousuariots'] = df['serviciousuariots'] + 'PM'
 df['match'] = (df['_merge']=='both')
 df.drop(['_merge', 'servicioPM'], axis=1, inplace=True)
 
-df.to_csv('TOC_HORA_PASADA.csv', sep=';', index=False)
+df.to_csv('OT25.csv', sep=';', index=False)
