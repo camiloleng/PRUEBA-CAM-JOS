@@ -134,7 +134,17 @@ df['toc_categoria'].replace({'1A':'1', '1B':'1', '4A':'4', '4B':'4', '4C':'4'}, 
 print(df[['tipo_bus', 'plazas', 'toc_categoria']])
 print(len(df))
 df = df.merge(va, on=['tipo_bus', 'plazas', 'toc_categoria'], how='left', indicator=True)
-print(len(df))
+
+'''
+Revisar que buses no se les calculó la varianza y eliminar
+print(len(df[df['_merge']=='both']))
+print(len(df[df['_merge']=='left_only']))
+print(df[df['_merge']=='left_only'])
+print(df[df['_merge']=='left_only']['plazas'].unique())
+print(df[df['_merge']=='left_only']['tipo_bus'].unique())
+'''
+df=df[df['_merge']=='both']
+
 def my_agg(x):
 	names = {
 		'toc'		: x['toc'].mean(),
