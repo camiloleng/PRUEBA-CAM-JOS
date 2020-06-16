@@ -7,7 +7,7 @@
 import pandas as pd
 import numpy as np
 
-pd.set_option('display.height', 1000)
+# pd.set_option('display.height', 1000)
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 150)
@@ -23,38 +23,55 @@ af = pd.read_csv(PATH2, sep=';')		# TASAS DE OCUPACIÓN MEDIDAS.
 pc = pd.read_csv(PATH3, sep=';')		# PERFILES DE CARGA MEDIDOS.
 di = pd.read_csv(PATH4, sep=';')		# PERFILES DE CARGA ESTUDIO DICTUC 2012.
 
-# seleccionar periodo (4:PUNTA MAÑANA).
-af = af[af['periodo']==4]
-pc = pc[pc['periodo']==4]
 
-# cambiar nombre de servicios en PM.
-df['servicioPM'] = (df['serviciousuariots'].str[-2:]=='PM')
-df.loc[df['servicioPM'], 'serviciousuariots'] = df['serviciousuariots'].str[:-2]
+PERIODOS=[4,6,9]
 
-# mantener la última medición de tasa de ocupación por servicio, sentido, parada.
-af.sort_values('fecha', inplace=True)
-af.drop_duplicates(['serviciousuariots', 'paradero'], keep='last', inplace=True)
+df_FINAL= pd.DataFrame([])
+for j in PERIODOS:
 
-# cruzar información de tasas de ocupación de perfiles corregidos.
-af = af[['serviciousuariots', 'paradero', 'ot', 'toc', 'IC']]
-df = pd.merge(df, af, on=['serviciousuariots', 'paradero'], how='left')
+	# seleccionar periodo (4:PUNTA MAÑANA, 6:FUERA PUNTA, 9:PUNTA TARDE).
+	af2 = af[af['periodo']==j].copy()
+	pc2 = pc[pc['periodo']==j].copy()
+	df2 = df[df['periodo']==j].copy()
 
-# cruzar con mediciones de perfiles de carga en OTs anteriores.
-di.rename({'carga':'DICTUC2012'}, axis=1, inplace=True)
-di = di[['serviciousuariots', 'paradero', 'DICTUC2012']]
-df = df.merge(di, on=['serviciousuariots', 'paradero'], how='left')
+	''' NO SE REALIZA ESTE PASO DEBIDO A QUE NO ES NECESARIO SEGUN LA DATA QUE SE UTILIZA
 
-# pivotear perfiles de carga de OTs.
-pc['key'] = pc['serviciousuariots'] + '~' + pc['paraderousuario']
-pc = pc.pivot('key', 'ot', 'carga').reset_index()
+	# cambiar nombre de servicios en PM.
+	'''
+	df['servicioPM'] = (df['serviciousuariots'].str[-2:]=='PM')
+	df.loc[df['servicioPM'], 'serviciousuariots'] = df['serviciousuariots'].str[:-2]
+	# mantener la última medición de tasa de ocupación por servicio, sentido, parada.
+	af2.sort_values('fecha', inplace=True)
+	af2.drop_duplicates(['serviciousuariots', 'paradero'], keep='last', inplace=True)
 
-# recuperar formato.
-pc['serviciousuariots'] = pc['key'].str.split('~', expand=True)[0]
-pc['paraderousuario']   = pc['key'].str.split('~', expand=True)[1]
-pc.drop('key', axis=1, inplace=True)
+	# cruzar información de tasas de ocupación de perfiles corregidos.
+	af2 = af2[['serviciousuariots', 'paradero', 'ot', 'toc', 'IC']]
+	df2 = pd.merge(df2, af2, on=['serviciousuariots', 'paradero'], how='left')
 
-# cruzar perfil de carga ADATRAP con perfiles de carga OTs.
-df = df.merge(pc, on=['serviciousuariots', 'paraderousuario'], how='left')
+	# cruzar con mediciones de perfiles de carga en OTs anteriores.
+	di.rename({'carga':'DICTUC2012'}, axis=1, inplace=True)
+	di = di[['serviciousuariots', 'paradero', 'DICTUC2012']]
+	df2 = df2.merge(di, on=['serviciousuariots', 'paradero'], how='left')
 
-# guardar resultados.
-df.to_csv('03 RESULTADOS/PERFILES DE CARGA (2).csv', sep=';', index=False)
+	# pivotear perfiles de carga de OTs.
+	pc2['key'] = pc2['serviciousuariots'] + '~' + pc2['paraderousuario']
+	pc2 = pc2.pivot('key', 'ot', 'carga').reset_index()
+
+	# recuperar formato.
+	pc2['serviciousuariots'] = pc2['key'].str.split('~', expand=True)[0]
+	pc2['paraderousuario']   = pc2['key'].str.split('~', expand=True)[1]
+	pc2.drop('key', axis=1, inplace=True)
+
+	# cruzar perfil de carga ADATRAP con perfiles de carga OTs.
+	df2 = df2.merge(pc2, on=['serviciousuariots', 'paraderousuario'], how='left')
+	# guardar resultados.
+	df2.to_csv('03 RESULTADOS/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
+	columnas= df2.columns
+	df_FINAL = df_FINAL.append(df2, ignore_index=True, sort=True)
+
+
+df_FINAL=df_FINAL[columnas]
+df_FINAL.to_csv('03 RESULTADOS/PERFILES DE CARGA (2).csv', sep=';', index=False)
+
+
+
