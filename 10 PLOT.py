@@ -21,8 +21,8 @@ POT_CP = {'POT03':'#116466', 'POT05':'#BCAB79', 'POT07':'#D79922', 'POT09':'#99C
 POT_LB = {'P_OT03':'OT03', 'P_OT05':'OT05', 'P_OT07':'OT07', 'P_OT09':'OT09', 'DICTUC2012':'DICTUC 2012'}
 TOC_CP = {'OT01':'#AC3B61', 'OT03':'#116466', 'OT09':'#99C5B5', 'OT12':'#ff3737'}
 
-PATH1 = '03 RESULTADOS/PERFILES DE CARGA (3).csv'
-PATH2 = '03 RESULTADOS/PERFILES ANALISIS.csv'
+PATH1 = '03 RESULTADOS/PERFILES DE CARGA (3) P-4.csv'
+PATH2 = '03 RESULTADOS/PERFILES ANALISIS P-4.csv'
 
 #COLUMNS1 = ['serviciosentido','serviciousuariots','servicioPM','paradero','paraderousuario','correlativo','nombreparada','zp','metro','cargapromedio_adtp','cargapromedio','cargacorregida','cargamax','cargamin','TOC','IC','OT','POT03','POT05','POT07','POT09','DICTUC2012','cargaTOCcorregida']
 COLUMNS2 = ['serviciosentido','estado']
@@ -38,7 +38,7 @@ df = pd.merge(df1, df2, on='serviciosentido')
 df.loc[df['toc']<df['cargapromedio'], 'toc'] = np.nan
 
 # corregir nombre de serviciousuariots.
-df.loc[df['servicioPM'], 'serviciousuariots'] = df['serviciousuariots'] + 'PM'
+# df.loc[df['servicioPM'], 'serviciousuariots'] = df['serviciousuariots'] + 'PM'
 
 # identificar perfiles de carga OTs a graficar.
 PERFILES_OTS = df.columns[31:-4]
@@ -49,10 +49,12 @@ for x in df['serviciosentido'].unique():
 	print(x)
 	dd = df[df['serviciosentido']==x].reset_index(drop=True).sort_values('correlativo')
 
+
 	# identificar nombre del servicio y si posee información para su validación.
 	SERVICIO = dd.loc[0,'serviciousuariots']
 	ESTADO 	 = df2.loc[df2['serviciosentido']==x, 'estado'].values
-
+	
+	print(ESTADO)
 	# crear figura.
 	fig, ax = plt.subplots(figsize=(10,6))
 	plt.axhline(color='k', lw=.8, zorder=0)
@@ -121,7 +123,7 @@ for x in df['serviciosentido'].unique():
 	plt.legend(fontsize='small')
 
 	plt.tight_layout()
-
+	
 	# guardar perfil en distinta carpeta dependiendo de clasificación.
 	if ESTADO=='SIN INFO':
 		SAVEPATH = '04 FIGURAS/01 PERFILES/01 SIN INFORMACION/{}.png'.format(x)
