@@ -12,16 +12,16 @@ PATH1 = '01 ORIGINALES/BBDD_OT23_v01.csv'
 PATH2 = 'VARIANZA POR TIPO DE BUS.csv'
 PATH4 = '01 ORIGINALES/DICC PUNTOS MEDICION OT23.csv'
 
-COLS1 = ['Hora', 'Fecha', 'COD TSGO', 'Pasajeros_Después', 'Servicio', 'Sentido_Servicio', 'Punto', 'OT', 'Tipo_Bus', 'Plazas', 'TOC_Después', 'id_punto']
+COLS1 = ['Hora', 'Fecha', 'COD TSTGO', 'Pasajeros_Después', 'Servicio', 'Sentido_Servicio', 'Punto', 'OT', 'Tipo_Bus', 'Plazas', 'TOC_Después', 'id_punto']
 COLS2 = ['tipo_bus', 'plazas', 'toc_categoria', 'Var']
 COLS4 = ['periodo', 'ss', 'id_aforo', 'paradero']
 
 # leer datos de TOCs consolidados.
-df = pd.read_csv(PATH1, sep=';', dtype=str, na_values='-', usecols=COLS1)
+df = pd.read_csv(PATH1, sep=';', dtype=str, na_values='-', usecols=COLS1, encoding='latin-1')
 va = pd.read_csv(PATH2, sep=';', usecols=COLS2)
 pm = pd.read_csv(PATH4, sep=';', usecols=COLS4)
 
-df.rename({'Pasajeros_Después':'toc', 'COD TSGO':'paradero_original', 'OT':'ot', 'Punto':'punto', 'TOC_Después':'toc_categoria', 'Tipo_Bus':'tipo_bus', 'Plazas':'plazas','Fecha':'fecha', 'Hora':'hora'}, axis=1, inplace=True)
+df.rename({'Pasajeros_Después':'toc', 'COD TSTGO':'paradero_original', 'OT':'ot', 'Punto':'punto', 'TOC_Después':'toc_categoria', 'Tipo_Bus':'tipo_bus', 'Plazas':'plazas','Fecha':'fecha', 'Hora':'hora'}, axis=1, inplace=True)
 pm.rename({'ss':'Servicio'}, axis=1, inplace=True)
 
 
@@ -164,7 +164,8 @@ df['IC'] = 1.96 * df['varianza'].apply(np.sqrt) / df['n'].apply(np.sqrt)
 # IDENTIFICAR TOCS QUE TIENEN MAL ASOCIADO EL PARADERO. ===========================================
 
 # leer perfiles de carga.
-PATH3 = 'C:/jimbarack/GitProyects/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
+#PATH3 = 'C:/jimbarack/GitProyects/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
+PATH3 = 'C:/CLENG/GIT PROYECTS/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
 COLS3 = ['serviciousuariots','paradero']
 
 dd = pd.read_csv(PATH3, sep=';', usecols=COLS3)
