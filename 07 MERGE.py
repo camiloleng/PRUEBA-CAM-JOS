@@ -1,8 +1,3 @@
-# ================================================================================
-# Author: 	   Camilo Leng Olivares
-# Last update: 28-05-2020
-# Description: Cruzar información de perfiles con mediciones.
-# ================================================================================
 
 import pandas as pd
 import numpy as np
@@ -37,9 +32,9 @@ for j in PERIODOS:
 	''' NO SE REALIZA ESTE PASO DEBIDO A QUE NO ES NECESARIO SEGUN LA DATA QUE SE UTILIZA
 
 	# cambiar nombre de servicios en PM.
-	'''
 	df['servicioPM'] = (df['serviciousuariots'].str[-2:]=='PM')
 	df.loc[df['servicioPM'], 'serviciousuariots'] = df['serviciousuariots'].str[:-2]
+	'''
 	# mantener la última medición de tasa de ocupación por servicio, sentido, parada.
 	af2.sort_values('fecha', inplace=True)
 	af2.drop_duplicates(['serviciousuariots', 'paradero'], keep='last', inplace=True)
@@ -64,8 +59,15 @@ for j in PERIODOS:
 
 	# cruzar perfil de carga ADATRAP con perfiles de carga OTs.
 	df2 = df2.merge(pc2, on=['serviciousuariots', 'paraderousuario'], how='left')
+	
 	# guardar resultados.
-	df2.to_csv('03 RESULTADOS/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
+	if j ==4:
+		df2.to_csv('03 RESULTADOS/PM/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
+	elif j==6:
+		df2.to_csv('03 RESULTADOS/FP/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
+	elif j==9:
+		df2.to_csv('03 RESULTADOS/PT/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
+
 	columnas= df2.columns
 	df_FINAL = df_FINAL.append(df2, ignore_index=True, sort=True)
 
