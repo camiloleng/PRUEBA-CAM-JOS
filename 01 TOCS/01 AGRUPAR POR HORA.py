@@ -15,7 +15,7 @@ COLS1 = ['Hora', 'Fecha', 'COD TSTGO', 'Pasajeros_Después', 'POE', 'Servicio', 
 COLS2 = ['tipo_bus', 'plazas', 'toc_categoria', 'Var']
 
 # leer datos de TOCs consolidados.
-df = pd.read_csv(PATH1, sep=';', dtype=str, na_values='-', usecols=COLS1)
+df = pd.read_csv(PATH1, sep=';', dtype=str, na_values='-', usecols=COLS1, encoding='latin-1')
 va = pd.read_csv(PATH2, sep=';', usecols=COLS2)
 
 
@@ -150,7 +150,8 @@ df['IC'] = 1.96 * df['varianza'].apply(np.sqrt) / df['n'].apply(np.sqrt)
 # IDENTIFICAR TOCS QUE TIENEN MAL ASOCIADO EL PARADERO. ===========================================
 
 # leer perfiles de carga.
-PATH3 = 'C:/jimbarack/GitProyects/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
+#PATH3 = 'C:/jimbarack/GitProyects/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
+PATH3 = 'C:/CLENG/GIT PROYECTS/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
 COLS3 = ['serviciousuariots','paradero']
 
 dd = pd.read_csv(PATH3, sep=';', usecols=COLS3)
