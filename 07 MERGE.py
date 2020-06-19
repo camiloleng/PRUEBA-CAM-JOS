@@ -8,7 +8,7 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 150)
 
 PATH1 = '03 RESULTADOS/PERFILES DE CARGA (1).csv'
-PATH2 = '01 TOCS/02 RESULTADOS/TOC (HPASADA).csv'
+PATH2 = '01 TOCS/TOC (HPASADA).csv'
 PATH3 = '02 PERFILES OTS/PERFILES DE CARGA OT.csv'
 PATH4 = '02 PERFILES OTS/PERFILES DE CARGA DICTUC 2012.csv'
 
@@ -61,7 +61,7 @@ for j in PERIODOS:
 	df2 = df2.merge(pc2, on=['serviciousuariots', 'paraderousuario'], how='left')
 	
 	# guardar resultados.
-	if j ==4:
+	if j==4:
 		df2.to_csv('03 RESULTADOS/PM/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
 	elif j==6:
 		df2.to_csv('03 RESULTADOS/FP/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
