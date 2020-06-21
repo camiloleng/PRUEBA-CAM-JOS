@@ -164,8 +164,7 @@ df['IC'] = 1.96 * df['varianza'].apply(np.sqrt) / df['n'].apply(np.sqrt)
 # IDENTIFICAR TOCS QUE TIENEN MAL ASOCIADO EL PARADERO. ===========================================
 
 # leer perfiles de carga.
-#PATH3 = 'C:/jimbarack/GitProyects/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
-PATH3 = 'C:/CLENG/GIT PROYECTS/PRUEBA-CAM-JOS/00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
+PATH3 = '../00 DATOS/PERFILES DE CARGA PROMEDIO_AGO19.csv'
 COLS3 = ['serviciousuariots','paradero']
 
 dd = pd.read_csv(PATH3, sep=';', usecols=COLS3)
