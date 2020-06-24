@@ -1,0 +1,40 @@
+Cantidad de mediciones por periodo realizadas:
+periodo
+10        2
+11        2
+12        6
+2         2
+20        1
+3       121
+4     32619
+5       525
+6     29834
+7       278
+8       235
+9     32215
+
+Cantidad de mediciones con información suficiente:
+periodo
+2         2
+3        88
+4     27098
+5       462
+6     27793
+7       259
+8       203
+9     28233
+11        2
+12        4
+20        1
+
+Cantidad tasas de ocupación promedio calculadas:
+periodo
+2        1
+3       21
+4     2244
+5      102
+6     2154
+7       64
+8       38
+9     2316
+11       1
