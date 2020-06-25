@@ -8,16 +8,16 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 150)
 
 PATH1 = '03 RESULTADOS/PERFILES DE CARGA (1).csv'
-PATH2 = '01 TOCS/TOC (HPASADA).csv'
-PATH3 = '02 PERFILES OTS/PERFILES DE CARGA OT.csv'
-PATH4 = '02 PERFILES OTS/PERFILES DE CARGA DICTUC 2012.csv'
+PATH2 = '01 TOCS/02 RESULTADOS/TOC_A&M-OT05.csv'
+PATH3 = '02 PERFILES OTS/PERFILES DE CARGA (3).csv'
+
+col3= ['ot','periodotsexpedicion', 'serviciousuariots', 'paradero', 'cargacorregida']
 
 # leer datos
 df = pd.read_csv(PATH1, sep=';')		# PERFILES CORREGIDOS.
 af = pd.read_csv(PATH2, sep=';')		# TASAS DE OCUPACIÓN MEDIDAS.
-pc = pd.read_csv(PATH3, sep=';')		# PERFILES DE CARGA MEDIDOS.
-di = pd.read_csv(PATH4, sep=';')		# PERFILES DE CARGA ESTUDIO DICTUC 2012.
-
+pc = pd.read_csv(PATH3, sep=';', usecols=col3)		# PERFILES DE CARGA OT14.
+pc.rename(columns={'periodotsexpedicion':'periodo', 'cargacorregida':'cargacorregida_OT14'}, inplace=True)
 
 PERIODOS=[4,6,9]
 
@@ -28,13 +28,8 @@ for j in PERIODOS:
 	af2 = af[af['periodo']==j].copy()
 	pc2 = pc[pc['periodo']==j].copy()
 	df2 = df[df['periodo']==j].copy()
-
-	''' NO SE REALIZA ESTE PASO DEBIDO A QUE NO ES NECESARIO SEGUN LA DATA QUE SE UTILIZA
-
-	# cambiar nombre de servicios en PM.
-	df['servicioPM'] = (df['serviciousuariots'].str[-2:]=='PM')
-	df.loc[df['servicioPM'], 'serviciousuariots'] = df['serviciousuariots'].str[:-2]
-	'''
+	af3 = af[af['periodo']==j].copy()
+	
 	# mantener la última medición de tasa de ocupación por servicio, sentido, parada.
 	af2.sort_values('fecha', inplace=True)
 	af2.drop_duplicates(['serviciousuariots', 'paradero'], keep='last', inplace=True)
@@ -43,23 +38,22 @@ for j in PERIODOS:
 	af2 = af2[['serviciousuariots', 'paradero', 'ot', 'toc', 'IC']]
 	df2 = pd.merge(df2, af2, on=['serviciousuariots', 'paradero'], how='left')
 
-	# cruzar con mediciones de perfiles de carga en OTs anteriores.
-	di.rename({'carga':'DICTUC2012'}, axis=1, inplace=True)
-	di = di[['serviciousuariots', 'paradero', 'DICTUC2012']]
-	df2 = df2.merge(di, on=['serviciousuariots', 'paradero'], how='left')
+	
+	# cruzar perfil de carga ADATRAP con perfiles de carga OT 14.
+	df2 = df2.merge(pc2, on=['ot','periodo','serviciousuariots', 'paradero'], how='left')
+	
 
 	# pivotear perfiles de carga de OTs.
-	pc2['key'] = pc2['serviciousuariots'] + '~' + pc2['paraderousuario']
-	pc2 = pc2.pivot('key', 'ot', 'carga').reset_index()
-
-	# recuperar formato.
-	pc2['serviciousuariots'] = pc2['key'].str.split('~', expand=True)[0]
-	pc2['paraderousuario']   = pc2['key'].str.split('~', expand=True)[1]
-	pc2.drop('key', axis=1, inplace=True)
-
-	# cruzar perfil de carga ADATRAP con perfiles de carga OTs.
-	df2 = df2.merge(pc2, on=['serviciousuariots', 'paraderousuario'], how='left')
+	af3['key'] = af3['serviciousuariots'] + '~' + af3['paradero']
+	af3.drop_duplicates(['ot','serviciousuariots', 'paradero'], keep='last', inplace=True)
+	af3 = af3.pivot('key', 'ot', 'periodo').reset_index()
 	
+	# recuperar formato.
+	af3['serviciousuariots'] = af3['key'].str.split('~', expand=True)[0]
+	af3['paradero']   = af3['key'].str.split('~', expand=True)[1]
+	af3.drop('key', axis=1, inplace=True)
+	df2 = df2.merge(af3, on=['serviciousuariots', 'paradero'], how='left')
+
 	# guardar resultados.
 	if j==4:
 		df2.to_csv('03 RESULTADOS/PM/PERFILES DE CARGA (2) P-{}.csv'.format(j), sep=';', index=False)
