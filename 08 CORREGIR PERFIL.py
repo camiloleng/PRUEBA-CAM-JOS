@@ -1,93 +1,66 @@
 # ================================================================================
 # Author: 	   Camilo Leng Olivares
-# Last update: 28-05-2020
 # Description: Corregir perfiles en Zonas Pagas.
 # ================================================================================
 
 import pandas as pd
 import numpy as np
 
-# pd.set_option('display.height', 1000)
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 150)
 
+PATH1 = '03 RESULTADOS/PERFILES DE CARGA (2).csv'
+PATH2 = '03 RESULTADOS/MATRIZ PROBABILIDADES.csv'
 
-PERIODOS=[4,6,9]
-
-
-for j in PERIODOS:
-	
-	if j ==4:
-		PATH1 = '03 RESULTADOS/PM/PERFILES DE CARGA (2) P-{}.csv'.format(j)
-	elif j==6:
-		PATH1 = '03 RESULTADOS/FP/PERFILES DE CARGA (2) P-{}.csv'.format(j)
-	elif j==9:
-		PATH1 = '03 RESULTADOS/PT/PERFILES DE CARGA (2) P-{}.csv'.format(j)
+COLUMNS1 = ['periodo','serviciosentido','paradero','correlativo','zp','metro','subidascorregidas','bajadascorregidas','cargacorregida','toc']
 
 
+# Leer datos.
+data = pd.read_csv(PATH1, sep=';')
+mp 	 = pd.read_csv(PATH2, sep=';')
 
-	PATH2 = '03 RESULTADOS/MATRIZ PROBABILIDADES.csv'
+df = data[COLUMNS1].copy()
 
-	COLUMNS1 = ['serviciosentido','paradero','correlativo','zp','metro','subidascorregidas','bajadascorregidas','cargacorregida','toc']
+# Identificar primera parada por servicio donde exista una medición TOC y sea ZP.
+df.loc[df[(df['zp']==1)&(df['toc'].notnull())].groupby(['serviciosentido'])['correlativo'].idxmin(), 'edit'] = True
+df.loc[df['edit'].isnull(), 'edit'] = False
 
-	# leer datos.
-	df = pd.read_csv(PATH1, sep=';', usecols=COLUMNS1)
-	mp = pd.read_csv(PATH2, sep=';')
+# Calcular diferencia de pasajeros.
+df.loc[(df['edit']) & (df['toc']>df['cargacorregida']), 'subidasTOC'] = df['toc'] - df['cargacorregida']
+df['subidasTOC'].fillna(0, inplace=True)
 
-	# identificar primera parada por servicio donde exista una medición TOC y sea ZP.
-	df.loc[df[(df['zp']==1)&(df['toc'].notnull())].groupby(['serviciosentido'])['correlativo'].idxmin(), 'edit'] = True
-	df.loc[df['edit'].isnull(), 'edit'] = False
+# Cruzar subidas de TOC con matriz de probabilidad de bajada.
+aux = df[['periodo','serviciosentido', 'paradero', 'subidasTOC']].rename({'paradero':'par_subida'}, axis=1)
+mp = pd.merge(mp, aux, how='left', on=['periodo','serviciosentido', 'par_subida'])
 
-	# calcular diferencia de pasajeros.
-	df.loc[(df['edit']) & (df['toc']>df['cargacorregida']), 'subidasTOC'] = df['toc'] - df['cargacorregida']
-	df['subidasTOC'].fillna(0, inplace=True)
+# Calculadr bajadas de TOC según periodo - servicio - sentido - parada de subida.
+mp['bajadasTOC'] = mp['subidasTOC'] * mp['probabilidad']
 
-	# cruzar subidas de TOC con matriz de probabilidad de bajada.
-	aux = df[['serviciosentido', 'paradero', 'subidasTOC']].rename({'paradero':'par_subida'}, axis=1)
-	mp = pd.merge(mp, aux, how='left', on=['serviciosentido', 'par_subida'])
+mp = mp[['periodo','serviciosentido', 'par_bajada', 'bajadasTOC']].rename({'par_bajada':'paradero'}, axis=1)
+mp = mp.groupby(['periodo','serviciosentido', 'paradero'], as_index=False).sum()
 
-	# calculadr bajAdas de TOC según periodo - servicio - sentido - parada de subida.
-	mp['bajadasTOC'] = mp['subidasTOC'] * mp['probabilidad']
+# Cruzar bajadas de TOC con perfiles de carga.
+df = pd.merge(df, mp, how='left', on=['periodo','serviciosentido', 'paradero'])
+df['bajadasTOC'].fillna(0, inplace=True)
 
-	mp = mp[['serviciosentido', 'par_bajada', 'bajadasTOC']].rename({'par_bajada':'paradero'}, axis=1)
-	mp = mp.groupby(['serviciosentido', 'paradero'], as_index=False).sum()
+# Calcular carga promedio con corrección por TOC.
+df['subidasTOCcorregidas'] = df['subidascorregidas'] + df['subidasTOC']
+df['bajadasTOCcorregidas'] = df['bajadascorregidas'] + df['bajadasTOC']
 
-	# cruzar bajadas de TOC con perfiles de carga.
-	df = pd.merge(df, mp, how='left', on=['serviciosentido', 'paradero'])
-	df['bajadasTOC'].fillna(0, inplace=True)
+df.sort_values(['periodo','serviciosentido','correlativo'], inplace=True)
+df['cargaTOCcorregida'] = df.groupby(['periodo','serviciosentido'])['subidasTOCcorregidas'].cumsum() - df.groupby(['periodo','serviciosentido'])['bajadasTOCcorregidas'].cumsum()
 
-	# calcular carga promedio con corrección por TOC.
-	df['subidasTOCcorregidas'] = df['subidascorregidas'] + df['subidasTOC']
-	df['bajadasTOCcorregidas'] = df['bajadascorregidas'] + df['bajadasTOC']
+# Seleccionar perfiles modificados.
+keep = df.loc[(df['edit']) & (df['toc']>df['cargacorregida']), ['periodo','serviciosentido']].drop_duplicates()
+df = df.merge(keep, on=['periodo','serviciosentido'])
 
-	df['cargaTOCcorregida'] = df.groupby('serviciosentido')['subidasTOCcorregidas'].cumsum() - df.groupby('serviciosentido')['bajadasTOCcorregidas'].cumsum()
+# Guardar resultados.
+df.to_csv('03 RESULTADOS/PERFILES DE CARGA TOC CORREGIDOS.csv', sep=';', index=False)
 
-	# seleccionar perfiles modificados.
-	keep = df.loc[(df['edit']) & (df['toc']>df['cargacorregida']), 'serviciosentido'].drop_duplicates().values
-	df = df[df['serviciosentido'].isin(keep)]
-	
-	# guardar resultados.
-	if j ==4:
-		
-		df.to_csv('03 RESULTADOS/PM/PERFILES DE CARGA TOC CORREGIDOS P-{}.csv'.format(j), sep=';', index=False)
-		
-	elif j==6:
-		df.to_csv('03 RESULTADOS/FP/PERFILES DE CARGA TOC CORREGIDOS P-{}.csv'.format(j), sep=';', index=False)
-	elif j==9:
-		df.to_csv('03 RESULTADOS/PT/PERFILES DE CARGA TOC CORREGIDOS P-{}.csv'.format(j), sep=';', index=False)
+# Merge con base de datos original.
+df = df[['periodo','serviciosentido','paradero','subidasTOCcorregidas','bajadasTOCcorregidas','cargaTOCcorregida']]
+data = data.merge(df, on=['periodo','serviciosentido','paradero'], how='left')
 
-	# merge con base de datos original.
-	df = df[['serviciosentido', 'paradero', 'subidasTOCcorregidas', 'bajadasTOCcorregidas', 'cargaTOCcorregida']]
-	data = pd.read_csv(PATH1, sep=';')
-
-	data = data.merge(df, on=['serviciosentido', 'paradero'], how='left')
-	
-	# guardar resultados.
-	if j ==4:
-		data.to_csv('03 RESULTADOS/PM/PERFILES DE CARGA (3) P-{}.csv'.format(j), sep=';', index=False)
-		
-	elif j==6:
-		data.to_csv('03 RESULTADOS/FP/PERFILES DE CARGA (3) P-{}.csv'.format(j), sep=';', index=False)
-	elif j==9:
-		data.to_csv('03 RESULTADOS/PT/PERFILES DE CARGA (3) P-{}.csv'.format(j), sep=';', index=False)
+# Guardar base de datos actualizada.
+data.to_csv('03 RESULTADOS/PERFILES DE CARGA (3).csv', sep=';', index=False)
