@@ -1,4 +1,9 @@
 
+# ================================================================================
+# Author: 	   Camilo Leng Olivares
+# Description: Juntar información de distintas fuentes.
+# ================================================================================
+
 import pandas as pd
 import numpy as np
 
