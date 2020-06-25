@@ -17,8 +17,16 @@ PERIODOS=[4,6,9]
 
 
 for j in PERIODOS:
+	
+	if j ==4:
+		PATH1 = '03 RESULTADOS/PM/PERFILES DE CARGA (2) P-{}.csv'.format(j)
+	elif j==6:
+		PATH1 = '03 RESULTADOS/FP/PERFILES DE CARGA (2) P-{}.csv'.format(j)
+	elif j==9:
+		PATH1 = '03 RESULTADOS/PT/PERFILES DE CARGA (2) P-{}.csv'.format(j)
 
-	PATH1 = '03 RESULTADOS/PERFILES DE CARGA (2) P-{}.csv'.format(j)
+
+
 	PATH2 = '03 RESULTADOS/MATRIZ PROBABILIDADES.csv'
 
 	COLUMNS1 = ['serviciosentido','paradero','correlativo','zp','metro','subidascorregidas','bajadascorregidas','cargacorregida','toc']
