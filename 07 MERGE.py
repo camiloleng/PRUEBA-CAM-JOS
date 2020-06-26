@@ -15,13 +15,17 @@ PATH1 = '03 RESULTADOS/PERFILES DE CARGA (1).csv'	# PERFILES DE CARGA CORREGIDOS
 PATH2 = '01 TOCS/02 RESULTADOS/TOC_A&M-OT05.csv'	# MEDICIONES DE TASA DE OCUPACIÓN.
 PATH3 = '02 PERFILES OTS/PERFILES DE CARGA (3).csv'	# PERFILES DE CARGA CORREGIDOS (Oct2018).
 
-COL3 = ['periodotsexpedicion', 'serviciosentido', 'paradero', 'cargacorregida']
+COL3 = ['periodotsexpedicion', 'serviciosentido', 'paradero', 'cargacorregida', 'subidascorregidas']
 
 # Leer datos
 df = pd.read_csv(PATH1, sep=';')
 af = pd.read_csv(PATH2, sep=';')
 pc = pd.read_csv(PATH3, sep=';', usecols=COL3)
-pc.rename(columns={'periodotsexpedicion':'periodo', 'cargacorregida':'cargacorregida_OT14'}, inplace=True)
+
+pc.rename(columns={
+	'periodotsexpedicion' 	: 'periodo', 
+	'cargacorregida' 		: 'cargacorregida_OT14',
+	'subidascorregidas' 	: 'subidascorregidas_OT14'}, inplace=True)
 
 
 # Mantener la última medición de tasa de ocupación por periodo, servicio, sentido, parada.
