@@ -5,8 +5,8 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 150)
 
-PATH1 = 'BBDD_TOC.csv'						# Mediciones TOCs
-PATH2 = 'VARIANZA POR TIPO DE BUS.csv'		# Varianza de mediciones
+PATH1 = 'BBDD_TOC.csv'							# Mediciones TOCs
+PATH2 = 'VARIANZA POR TIPO DE BUS.csv'			# Varianza de mediciones
 PATH3 = 'DICC PUNTOS MEDICION OT23 v2.csv'		# Dicc de puntos de medicion
 
 COLS1 = ['Hora', 'Periodo', 'Fecha', 'COD TSTGO', 'Pasajeros_Después', 'Servicio', 'Sentido', 'Punto', 'OT', 'Tipo_Bus', 'Plazas', 'TOC_Después', 'POE', 'id_punto']

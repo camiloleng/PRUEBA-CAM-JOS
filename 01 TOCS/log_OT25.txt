@@ -6,24 +6,24 @@ periodo
 5      101
 6        1
 8        5
-9     1098
+9     1097
 
 Cantidad de mediciones con información suficiente:
 periodo
 3        3
-4     1028
-5       63
+4     1224
+5       95
 6        1
-8        3
-9      613
-10      15
+8        5
+9     1017
+10      62
 
 Cantidad tasas de ocupación promedio calculadas:
 periodo
-3      3
-4     88
-5     14
-6      1
-8      2
-9     33
-10     5
+3       3
+4     112
+5      20
+6       1
+8       4
+9      55
+10     18
